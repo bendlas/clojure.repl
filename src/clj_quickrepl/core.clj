@@ -1,33 +1,56 @@
 (ns clj-quickrepl.core
-  (:refer-clojure :exclude [transient defn])
-  (:require [clojure.string :as string])
-  (:use [clojure.repl :only [source]]
-        [clojure.core.incubator :only [-?>]]
-        [clojure.java.io :only [reader]]
-        [clojure.template :only [do-template]])
-  (:import java.io.StringReader))
+  (:import (java.io BufferedReader StringReader)))
 
-(clojure.core/defn line-of-doc "Extracts a line with documentation" [v]
-  (if-let [lines (-?> v meta :doc StringReader. reader line-seq)]
-    (str 
-     (string/trim (first lines))
-     (and (second lines) " [...]"))
-    "<no doc>"))
+(defn ^:private line-of-doc
+  "Extracts a line of documentation from a var"
+  [v]
+  (let [doc (-> v meta :doc)
+        lines (when doc
+                (-> doc StringReader. BufferedReader. line-seq))
+        docline (first lines)]
+    (if docline
+      (str (.trim docline)
+           (and (second lines) " [...]"))
+      "<no doc>")))
+
+(defn dir-line
+  "Given a namespace and a sym,
+   returns string with the name and first line of doc"
+  [ns sym]
+  (let [v (ns-resolve ns sym)
+        ld (line-of-doc v)]
+    (if (= "nil" ld)
+      sym
+      (format "%-18s -- %s" sym ld))))
+
+(defn resolve-ns
+  "Like the-ns, but also looks in ns-aliases of current *ns*
+   and supports '*ns* as a special case"
+  [ns-or-sym]
+  (if (instance? clojure.lang.Namespace ns-or-sym)
+    ns-or-sym
+    (or (find-ns ns-or-sym)
+        (get (ns-aliases *ns*) ns-or-sym)
+        (and (= ns-or-sym '*ns*) *ns*)
+        (throw (IllegalArgumentException.
+                (format "No namespace: %s found" ns-or-sym))))))
+
+(defn dir-fn
+  "Returns a sorted seq of symbols naming public vars in
+   a namespace"
+  ([ns] (dir-fn ns ns-publics))
+  ([ns ns-fn]
+     (sort (map first (ns-fn (the-ns ns))))))
 
 (defmacro dir
-  ([] `(dir *ns* ns-publics))
+  "Print listings of namespaces with doc snippets
+   ns: a symbol naming a namespace or '*ns*
+   ns-fn: one of ns-(interns|publics|imports|...)
+   default invocation: (dir *ns* ns-publics)"
+  ([] `(dir ~*ns* ns-publics))
   ([ns] `(dir ~ns ns-publics))
   ([ns ns-fn]
-     (let [ns (if (= `*ns* ns)
-                *ns*
-                (-> (find-ns ns)
-                    (or (get (ns-aliases *ns*) ns))
-                    (or (throw (IllegalArgumentException.
-                                (format "%s: No such namespace" ns))))))]
-       `(doseq [[s# v#] (~ns-fn ~ns)
-                :let [ld# (line-of-doc v#)]]
+     (let [ns (resolve-ns ns)]
+       `(doseq [sym# (dir-fn ~ns ~ns-fn)]
           (println
-           (format "%-18s" s#)
-           (if (= "nil" ld#)
-             ""
-             (format " -- %s" ld#)))))))
+           (dir-line ~ns sym#))))))
