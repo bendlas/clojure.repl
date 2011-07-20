@@ -28,6 +28,6 @@ A better version of clojure.repl/dir
 
 ## License
 
-Copyright (C) 2011 FIXME
+Copyright (C) 2011 Herwig Hochleitner
 
 Distributed under the Eclipse Public License, the same as Clojure.
