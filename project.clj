@@ -1,6 +1,6 @@
 (defproject clj-quickrepl "1.0.0-SNAPSHOT"
   :description "FIXME: write description"
-  :dependencies [[org.clojure/clojure "1.2.1"]
+  :dependencies [[org.clojure/clojure "1.3.0-beta1"]
                  [org.clojure/data.json "0.1.0"]
                  [org.clojure/tools.logging "0.1.2"]
                  [org.clojure/core.incubator "0.1.0"]
