@@ -140,7 +140,8 @@
     (or (find-ns sym)
         (get (ns-aliases *ns*) sym)
         (and (= sym '*ns*) *ns*)
-        (do (require sym)
+        (do (println ";; namespace" sym "not loaded; requiring!")
+            (require sym)
             (find-ns sym)))))
 
 (defn dir-fn
