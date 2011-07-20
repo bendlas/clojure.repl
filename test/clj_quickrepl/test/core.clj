@@ -1,6 +1,27 @@
 (ns clj-quickrepl.test.core
   (:use [clj-quickrepl.core])
+  (:require [clj-quickrepl.core :as core])
   (:use [clojure.test]))
 
-(deftest replace-me ;; FIXME: write
-  (is false "No tests have been written."))
+(deftest test-line-of-doc
+  (let [ldvar #'clj-quickrepl.core/line-of-doc
+        ld @ldvar]
+    (is (= "no doc" (ld #'test-line-of-doc 50)))
+    (are [len res] (= (ld ldvar len) res)
+         50   "Extracts a line of documentation from a var »"
+         10   "Extracts …"
+         1    "E")))
+
+(deftest test-dir-line
+  (binding [*ns* (find-ns 'clj-quickrepl.test.core)
+            *terminal-width* 60
+            *multiline-token* "&"
+            *truncated-token* "%"
+            *arglist-printlen* 20]
+    (are [ns                 sym       col ap _  res] (= res (binding [*arglist-printlen* ap]
+                                                               (dir-line (to-namespace ns) sym col)))
+         'core               'dir-line 20  20 :> "dir-line             [ns sym column]: Given a namespace and%"
+         *ns*                'dir-line 0   20 :> "dir-line [ns sym column]: Given a namespace and a sym,&"
+         'clj-quickrepl.core 'dir-line 20  10 :> "dir-line             [ns sym c%: Given a namespace and a sy%"
+         '*ns*               'dir-line 50  20 :> "dir-line                                           : Given %"
+         'core               'dir      12  20 :> "dir :macro   [] [ns] [ns ns-fn]: Print listings of namespac%")))
