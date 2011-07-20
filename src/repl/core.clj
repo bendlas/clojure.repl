@@ -153,7 +153,7 @@
             syms# (dir-fn ns# ~ns-fn)
             col# (->> syms#
                       (map (comp count name))
-                      (reduce max))]
+                      (reduce max 0))]
         (doseq [sym# syms#]
           (println
            (dir-line ns# sym# col#))))))

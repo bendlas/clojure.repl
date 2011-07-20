@@ -25,3 +25,9 @@
          'repl.core 'dir-line 20  10 :> "dir-line             [ns sym c%: Given a namespace and a sy%"
          '*ns*      'dir-line 50  20 :> "dir-line                                           : Given %"
          'core      'dir      12  20 :> "dir :macro   [] [ns] [ns ns-fn]: Print listings of namespac%")))
+
+(deftest test-dir
+  (let [empty (create-ns 'empty)]
+    ;; testing empty
+    (is (= "" (with-out-str
+                (dir empty))))))
