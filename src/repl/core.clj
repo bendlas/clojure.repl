@@ -120,6 +120,17 @@
   ;; This is to allow for `(dir *ns* ns-interns)` and such.
   
   ;; Tries to require as a last resort.
+
+  nil
+  (to-namespace [_]
+    (throw (IllegalArgumentException.
+            (format "Cannot coerce nil to clojure.lang.Namespace"))))
+  
+  java.lang.Object
+  (to-namespace [o]
+    (throw (IllegalArgumentException.
+            (format "Cannot coerce %s to clojure.lang.Namespace"
+                    (.getName (class o))))))
   
   clojure.lang.Namespace
   (to-namespace [ns] ns)
