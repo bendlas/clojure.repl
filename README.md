@@ -1,4 +1,4 @@
-# clj-quickrepl
+# clojure.repl.dir
 
 A better version of clojure.repl/dir
 
