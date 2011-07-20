@@ -1,4 +1,4 @@
-(ns clj-quickrepl.core
+(ns repl.core
   (:require [clojure.string :as str]))
 
 ;; ## This module implements a dir macro
