@@ -159,5 +159,5 @@
           (println
            (dir-line ns# sym# col#))))))
 
-(println "Replacing clojure.repl/dir")
+(println ";; Replacing clojure.repl/dir")
 (alter-var-root #'clojure.repl/dir (constantly @#'dir))
